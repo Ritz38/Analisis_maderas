@@ -21,7 +21,7 @@ def maderas_comunes(df):
     volumenes = df.groupby('ESPECIE')['VOLUMEN M3'].sum()
     st.write('Las 5 maderas mas comunes  y su respectivo volumen son:\n', volumenes.loc[agrupados_madera_concurrencias.index])
 
-    eleccion = st.selectbox('Elija el departamento del cual quiere saber las maderas mas comunes', df.unique())
+    eleccion = st.selectbox('Elija el departamento del cual quiere saber las maderas mas comunes', list(df.unique()))
     agrupados_madera_concurrencias_dpto = df[df['DPTO']==eleccion].groupby('ESPECIE').size().sort_values(ascending=False).head()
     volumenes_dpto = df[df['DPTO']==eleccion].groupby('ESPECIE')['VOLUMEN M3'].sum()
     
