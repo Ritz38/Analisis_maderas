@@ -42,7 +42,7 @@ def mapa_calor(df):
     fig, ax = plt.subplots()
     
     vol_por_dpto = df.groupby('DPTO')['VOLUMEN M3'].sum().reset_index()
-    df_geo = colombia.merge(vol_por_dpto, left_on='DPTO', right_on='DPTO')
+    df_geo = colombia.merge(vol_por_dpto, left_on='NOMBRE_DPT', right_on='DPTO')
     
     df_geo.plot(column='VOLUMEN M3', cmap='OrRd', linewidth=0.8, edgecolor='k', legend=True, ax=ax)
     
@@ -99,6 +99,7 @@ def main():
     st.title("Análisis de Plantaciones Forestales Comerciales en Colombia")
     
     df = cargar_datos()
+    df['DPTO'] = df['DPTO'].str.upper()
     if df is not None:
         st.write("Vista previa de los datos:")
         st.write(df.head())
