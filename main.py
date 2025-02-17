@@ -75,22 +75,33 @@ def municipios_mayor_movilidad(df):
 
 def evolucion_temporal_especie_producto(df):
     """Grafica la evolución del volumen de madera movilizada por especie y tipo de producto a lo largo del tiempo."""
-    # Convertir semestres a valores numéricos
-    semestre_map = {'I': 1, 'II': 2}
-    df['SEMESTRE_NUM'] = df['SEMESTRE'].map(semestre_map)
+    # Seleccionar la especie
+    especies = df['ESPECIE'].unique()
+    especie_seleccionada = st.selectbox('Seleccione la especie de madera:', especies)
     
-    # Crear una columna de fecha válida
-    df['FECHA'] = pd.to_datetime(df['AÑO'].astype(str) + '-01-01') + pd.to_timedelta((df['SEMESTRE_NUM'] - 1) * 6, unit='M')
+    # Filtrar los tipos de producto disponibles para la especie seleccionada
+    tipos_producto_disponibles = df[df['ESPECIE'] == especie_seleccionada]['TIPO PRODUCTO'].unique()
     
-    # Agrupar por año, especie y tipo de producto
-    evolucion = df.groupby([df['FECHA'].dt.year, 'ESPECIE', 'TIPO PRODUCTO'])['VOLUMEN M3'].sum().unstack()
+    # Seleccionar el tipo de producto (solo mostrar los disponibles para la especie seleccionada)
+    tipo_producto_seleccionado = st.selectbox('Seleccione el tipo de producto:', tipos_producto_disponibles)
     
-    # Graficar
-    fig, ax = plt.subplots()
-    evolucion.plot(ax=ax)
-    ax.set_title("Evolución temporal del volumen movilizado por especie y tipo de producto")
-    ax.set_ylabel("Volumen")
-    st.pyplot(fig)
+    # Filtrar el DataFrame por la especie y el tipo de producto seleccionados
+    df_filtrado = df[(df['ESPECIE'] == especie_seleccionada) & (df['TIPO PRODUCTO'] == tipo_producto_seleccionado)]
+    
+    # Verificar si el DataFrame filtrado está vacío
+    if df_filtrado.empty:
+        st.warning(f"No hay datos disponibles para la especie '{especie_seleccionada}' y el tipo de producto '{tipo_producto_seleccionado}'.")
+    else:
+        # Agrupar por año y calcular el volumen total
+        evolucion = df_filtrado.groupby('AÑO')['VOLUMEN M3'].sum()
+        
+        # Graficar
+        fig, ax = plt.subplots()
+        evolucion.plot(kind='line', ax=ax, marker='o')
+        ax.set_title(f"Evolución temporal del volumen movilizado de {especie_seleccionada} ({tipo_producto_seleccionado})")
+        ax.set_xlabel("Año")
+        ax.set_ylabel("Volumen (M3)")
+        st.pyplot(fig)
 
 def detectar_outliers(df):
     """Identifica valores atípicos en el volumen de madera movilizada."""
