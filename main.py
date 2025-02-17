@@ -50,6 +50,10 @@ def mapa_calor(df):
     ax.set_title("Distribución de volúmenes de madera por departamento")
     st.pyplot(fig)
 
+def agregar_nombre_municipio(row, ax):
+    """Agrega el nombre del municipio en el gráfico en las coordenadas del punto."""
+    ax.text(row.geometry.x, row.geometry.y, row['NOM_MPIO'], fontsize=8, ha='right', color='black')
+
 def municipios_mayor_movilidad(df):
     """Muestra los 10 municipios con mayor movilización de madera en un mapa."""
     
@@ -66,7 +70,7 @@ def municipios_mayor_movilidad(df):
     fig, ax = plt.subplots()
     colombia.plot(ax=ax, color='white', edgecolor='black')
     municipios.plot(ax=ax, color='red')
-    municipios.apply(lambda x: ax.text(x.geometry.x, x.geometry.y, x['NOM_MPIO'], fontsize=8, ha='right', color='black'), axis=1)
+    municipios.apply(agregar_nombre_municipio, ax=ax, axis=1)
     st.pyplot(fig)
 
 def evolucion_temporal(df):
