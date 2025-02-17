@@ -29,7 +29,7 @@ def maderas_comunes(df):
 
 def grafico_maderas(df):
     """Genera un gráfico de barras de las 10 especies con mayor volumen movilizado."""
-    especies = df.groupby('ESPECIE')['VOLUMEN'].sum().nlargest(10)
+    especies = df.groupby('ESPECIE')['VOLUMEN M3'].sum().nlargest(10)
     fig, ax = plt.subplots()
     especies.plot(kind='bar', ax=ax, color='skyblue')
     ax.set_title("Top 10 especies con mayor volumen movilizado")
