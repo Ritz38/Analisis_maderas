@@ -108,6 +108,7 @@ def main():
     if df is not None:
         st.write("Vista previa de los datos:")
         st.write(df.head())
+        global colombia
         colombia = gpd.read_file('https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/Colombia.geo.json')
         
         maderas_comunes(df)
