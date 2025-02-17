@@ -59,11 +59,13 @@ def municipios_mayor_movilidad(df):
     municipios = municipios.set_geometry('geometry')
     
     municipios_movidos = df.groupby('MUNICIPIO').size().sort_values(ascending=False).head(10)
-    municipios = municipios.loc[municipios_movidos.index]
+
+    # Filtrar los municipios que están en los 10 más movidos
+    municipios = municipios[municipios['NOM_MPIO'].isin(municipios_movidos.index)]
     
     fig, ax = plt.subplots()
     colombia.plot(ax=ax, color='white', edgecolor='black')
-    municipios.plot(ax=ax)
+    municipios.plot(ax=ax, color='red)
     st.pyploy(fig)
 
 def evolucion_temporal(df):
@@ -105,6 +107,7 @@ def main():
     
     df = cargar_datos()
     df['DPTO'] = df['DPTO'].str.upper()
+    df['MUNICIPIO'] = df['MUNICIPIO'].str.upper()
     if df is not None:
         st.write("Vista previa de los datos:")
         st.write(df.head())
