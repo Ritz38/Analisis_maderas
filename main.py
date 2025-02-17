@@ -31,10 +31,6 @@ def grafico_maderas(df):
     """Genera un gráfico de barras de las 10 especies con mayor volumen movilizado."""
     especies = df.groupby('ESPECIE')['VOLUMEN M3'].sum().nlargest(10)
     fig, ax = plt.subplots()
-
-    fig.patch.set_facecolor('black')  # Fondo de la figura
-    ax.set_facecolor('black') 
-    
     especies.plot(kind='bar', ax=ax, color='skyblue')
     ax.set_title("Top 10 especies con mayor volumen movilizado")
     ax.set_ylabel("Volumen")
