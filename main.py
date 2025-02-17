@@ -66,7 +66,7 @@ def municipios_mayor_movilidad(df):
     fig, ax = plt.subplots()
     colombia.plot(ax=ax, color='white', edgecolor='black')
     municipios.plot(ax=ax, color='red')
-    st.pyploy(fig)
+    st.pyplot(fig)
 
 def evolucion_temporal(df):
     """Grafica la evolución del volumen de madera movilizada por especie a lo largo del tiempo."""
