@@ -38,7 +38,7 @@ def grafico_maderas(df):
 
 def mapa_calor(df):
     """Genera un mapa de calor de volúmenes de madera por departamento."""
-    colombia = gpd.read_file('https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/Colombia.geo.json')
+    colombia = gpd.read_file('https://raw.githubusercontent.com/Ritz38/Analisis_maderas/refs/heads/main/Colombia.geo.json')
     fig, ax = plt.subplots()
     
     vol_por_dpto = df.groupby('DPTO')['VOLUMEN M3'].sum().reset_index()
