@@ -17,8 +17,9 @@ def cargar_datos():
 
 def maderas_comunes(df):
     """Identifica las especies de madera más comunes."""
-    st.subheader("Maderas más comunes a nivel pais:")
-    st.write(df.groupby('ESPECIE')['VOLUMEN M3'].sort_values(ascending=False).head())
+    agrupados_madera_concurrencias = df.groupby('ESPECIE').size().sort_values(ascending=False).head()
+    volumenes = df.groupby('ESPECIE')['VOLUMEN M3'].sum()
+    st.write('Las 5 maderas mas comunes  y su respectivo volumen son:\n', volumenes.loc[agrupados_madera_concurrencias.index])
 
 def grafico_maderas(df):
     """Genera un gráfico de barras de las 10 especies con mayor volumen movilizado."""
