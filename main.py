@@ -66,6 +66,7 @@ def municipios_mayor_movilidad(df):
     fig, ax = plt.subplots()
     colombia.plot(ax=ax, color='white', edgecolor='black')
     municipios.plot(ax=ax, color='red')
+    municipios.apply(lambda x: ax.text(x.geometry.x, x.geometry.y, x['NOM_MPIO'], fontsize=8, ha='right', color='black'), axis=1)
     st.pyplot(fig)
 
 def evolucion_temporal(df):
