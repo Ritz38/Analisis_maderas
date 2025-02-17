@@ -38,7 +38,6 @@ def grafico_maderas(df):
 
 def mapa_calor(df):
     """Genera un mapa de calor de volúmenes de madera por departamento."""
-    colombia = gpd.read_file('https://raw.githubusercontent.com/Ritz38/Analisis_maderas/refs/heads/main/Colombia.geo.json')
     fig, ax = plt.subplots()
     
     vol_por_dpto = df.groupby('DPTO')['VOLUMEN M3'].sum().reset_index()
@@ -53,13 +52,18 @@ def mapa_calor(df):
 
 def municipios_mayor_movilidad(df):
     """Muestra los 10 municipios con mayor movilización de madera en un mapa."""
-    top_municipios = df.groupby('MUNICIPIO')['VOLUMEN'].sum().nlargest(10)
-    municipios_geo = df[df['MUNICIPIO'].isin(top_municipios.index)]
+    
+    municipios = gpd.read_file('https://raw.githubusercontent.com/Ritz38/Analisis_maderas/refs/heads/main/puntos_municipios.csv')
+    
+    municipios['geometry'] = gpd.GeoSeries.from_wkt(municipios['Geo Municipio'])
+    municipios = municipios.set_geometry('geometry')
+    
+    municipios_movidos = df.groupby('MUNICIPIO').size().sort_values(ascending=False).head(10)
+    municipios = municipios.loc[municipios_movidos.index]
     
     fig, ax = plt.subplots()
-    municipios_geo.plot(kind='scatter', x='LONGITUD', y='LATITUD', c='red', s=50, ax=ax)
-    ax.set_title("Top 10 municipios con mayor movilización de madera")
-    st.pyplot(fig)
+    colombia.plot(ax=ax, color='white', edgecolor='black')
+    municipios.plot(ax=ax)
 
 def evolucion_temporal(df):
     """Grafica la evolución del volumen de madera movilizada por especie a lo largo del tiempo."""
@@ -103,6 +107,7 @@ def main():
     if df is not None:
         st.write("Vista previa de los datos:")
         st.write(df.head())
+        colombia = gpd.read_file('https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/Colombia.geo.json')
         
         maderas_comunes(df)
         
