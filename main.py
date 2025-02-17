@@ -24,6 +24,7 @@ def maderas_comunes(df):
     eleccion = st.selectbox('Elija el departamento del cual quiere saber las maderas mas comunes', list(df['DPTO'].unique()))
     agrupados_madera_concurrencias_dpto = df[df['DPTO']==eleccion].groupby('ESPECIE').size().sort_values(ascending=False).head()
     volumenes_dpto = df[df['DPTO']==eleccion].groupby('ESPECIE')['VOLUMEN M3'].sum()
+    st.write('Las 5 maderas mas comunes  y su respectivo volumen son:\n', volumenes_dpto.loc[agrupados_madera_concurrencias_dpto.index])
     
 
 def grafico_maderas(df):
