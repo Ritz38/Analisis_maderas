@@ -73,21 +73,25 @@ def municipios_mayor_movilidad(df):
     municipios.apply(agregar_nombre_municipio, ax=ax, axis=1)
     st.pyplot(fig)
 
-def evolucion_temporal(df):
-    """Grafica la evolución del volumen de madera movilizada por especie a lo largo del tiempo."""
-    df['FECHA'] = pd.to_datetime(df['FECHA'])
-    evolucion = df.groupby([df['FECHA'].dt.year, 'ESPECIE'])['VOLUMEN'].sum().unstack()
+def evolucion_temporal_especie_producto(df):
+    """Grafica la evolución del volumen de madera movilizada por especie y tipo de producto a lo largo del tiempo."""
+    df['FECHA'] = pd.to_datetime(df['AÑO'].astype(str) + '-' + df['SEMESTRE'].astype(str) + '-01')
+    evolucion = df.groupby([df['FECHA'].dt.year, 'ESPECIE', 'TIPO PRODUCTO'])['VOLUMEN M3'].sum().unstack()
     
     fig, ax = plt.subplots()
     evolucion.plot(ax=ax)
-    ax.set_title("Evolución temporal del volumen movilizado por especie")
+    ax.set_title("Evolución temporal del volumen movilizado por especie y tipo de producto")
     ax.set_ylabel("Volumen")
     st.pyplot(fig)
 
 def detectar_outliers(df):
     """Identifica valores atípicos en el volumen de madera movilizada."""
-    z_scores = stats.zscore(df['VOLUMEN'].dropna())
+    z_scores = stats.zscore(df['VOLUMEN M3'])
     return df.loc[np.abs(z_scores) > 3]
+
+def volumen_por_municipio(df):
+    """Calcula el volumen total de madera movilizada por municipio."""
+    return df.groupby('MUNICIPIO')['VOLUMEN M3'].sum().reset_index()
 
 def diversidad_shannon(df):
     """Calcula el índice de diversidad de Shannon para evaluar la diversidad de especies por departamento."""
@@ -95,16 +99,50 @@ def diversidad_shannon(df):
         p = x / x.sum()
         return -np.sum(p * np.log2(p))
     
-    return df.groupby('DEPARTAMENTO')['ESPECIE'].value_counts().unstack(fill_value=0).apply(shannon_entropy, axis=1)
+    return df.groupby('DPTO')['ESPECIE'].value_counts().unstack(fill_value=0).apply(shannon_entropy, axis=1)
 
 def clustering_departamentos(df):
     """Agrupa departamentos con patrones similares de movilización de madera."""
     from scipy.cluster.hierarchy import linkage, fcluster
     
-    vol_por_dep = df.groupby('DEPARTAMENTO')['VOLUMEN'].sum().values.reshape(-1, 1)
+    vol_por_dep = df.groupby('DPTO')['VOLUMEN M3'].sum().values.reshape(-1, 1)
     clusters = fcluster(linkage(vol_por_dep, method='ward'), 3, criterion='maxclust')
     
-    return pd.DataFrame({'DEPARTAMENTO': df['DEPARTAMENTO'].unique(), 'Cluster': clusters})
+    df_clusters = pd.DataFrame({'DPTO': df['DPTO'].unique(), 'Cluster': clusters})
+    
+    fig, ax = plt.subplots()
+    colombia.merge(df_clusters, left_on='NOMBRE_DPT', right_on='DPTO').plot(column='Cluster', cmap='Set3', legend=True, ax=ax)
+    ax.set_title("Clustering de departamentos por volumen de madera movilizada")
+    st.pyplot(fig)
+
+def especies_menor_volumen(df):
+    """Identifica las especies con menor volumen movilizado y su distribución geográfica."""
+    especies_menor_volumen = df.groupby('ESPECIE')['VOLUMEN M3'].sum().nsmallest(10)
+    df_menor_volumen = df[df['ESPECIE'].isin(especies_menor_volumen.index)]
+    
+    fig, ax = plt.subplots()
+    colombia.plot(ax=ax, color='white', edgecolor='black')
+    df_menor_volumen.plot(ax=ax, color='red', marker='o', markersize=5)
+    ax.set_title("Distribución geográfica de especies con menor volumen movilizado")
+    st.pyplot(fig)
+
+def distribucion_especies_entre_departamentos(df):
+    """Compara la distribución de especies entre departamentos."""
+    distribucion = df.groupby(['DPTO', 'ESPECIE'])['VOLUMEN M3'].sum().unstack()
+    
+    fig, ax = plt.subplots()
+    distribucion.plot(kind='bar', stacked=True, ax=ax)
+    ax.set_title("Distribución de especies entre departamentos")
+    ax.set_ylabel("Volumen")
+    st.pyplot(fig)
+
+def comparar_diversidad_regiones(df):
+    """Compara la diversidad de especies entre regiones."""
+    diversidad = diversidad_shannon(df)
+    diversidad.plot(kind='bar', color='skyblue')
+    plt.title("Comparación de diversidad de especies entre regiones")
+    plt.ylabel("Índice de Shannon")
+    st.pyplot()
 
 def main():
     """Función principal de la aplicación en Streamlit."""
@@ -130,8 +168,8 @@ def main():
         st.subheader("Municipios con mayor movilización")
         municipios_mayor_movilidad(df)
         
-        st.subheader("Evolución temporal del volumen movilizado")
-        evolucion_temporal(df)
+        st.subheader("Evolución temporal por especie y tipo de producto")
+        evolucion_temporal_especie_producto(df)
         
         st.subheader("Detección de valores atípicos")
         st.write(detectar_outliers(df))
@@ -141,6 +179,18 @@ def main():
         
         st.subheader("Clustering de departamentos")
         st.write(clustering_departamentos(df))
+        
+        st.subheader("Volumen por municipio")
+        st.write(volumen_por_municipio(df))
+        
+        st.subheader("Especies con menor volumen movilizado")
+        especies_menor_volumen(df)
+        
+        st.subheader("Distribución de especies entre departamentos")
+        distribucion_especies_entre_departamentos(df)
+        
+        st.subheader("Comparación de diversidad entre regiones")
+        comparar_diversidad_regiones(df)
 
 if __name__ == "__main__":
     main()
