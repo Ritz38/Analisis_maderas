@@ -75,9 +75,17 @@ def municipios_mayor_movilidad(df):
 
 def evolucion_temporal_especie_producto(df):
     """Grafica la evolución del volumen de madera movilizada por especie y tipo de producto a lo largo del tiempo."""
-    df['FECHA'] = pd.to_datetime(df['AÑO'].astype(str) + '-' + df['SEMESTRE'].astype(str) + '-01')
+    # Convertir semestres a valores numéricos
+    semestre_map = {'I': 1, 'II': 2}
+    df['SEMESTRE_NUM'] = df['SEMESTRE'].map(semestre_map)
+    
+    # Crear una columna de fecha válida
+    df['FECHA'] = pd.to_datetime(df['AÑO'].astype(str) + '-01-01') + pd.to_timedelta((df['SEMESTRE_NUM'] - 1) * 6, unit='M')
+    
+    # Agrupar por año, especie y tipo de producto
     evolucion = df.groupby([df['FECHA'].dt.year, 'ESPECIE', 'TIPO PRODUCTO'])['VOLUMEN M3'].sum().unstack()
     
+    # Graficar
     fig, ax = plt.subplots()
     evolucion.plot(ax=ax)
     ax.set_title("Evolución temporal del volumen movilizado por especie y tipo de producto")
