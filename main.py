@@ -87,13 +87,30 @@ def evolucion_temporal_especie_producto(df):
     
     # Filtrar el DataFrame por la especie y el tipo de producto seleccionados
     df_filtrado = df[(df['ESPECIE'] == especie_seleccionada) & (df['TIPO PRODUCTO'] == tipo_producto_seleccionado)]
+
+    granularidad = st.selectbox("Seleccione la granularidad temporal:", ["AÑO", "SEMESTRE", "TRIMESTRE"])
     
     # Verificar si el DataFrame filtrado está vacío
     if df_filtrado.empty:
         st.warning(f"No hay datos disponibles para la especie '{especie_seleccionada}' y el tipo de producto '{tipo_producto_seleccionado}'.")
     else:
+        # Crear una columna de fecha basada en la selección de granularidad
+        if granularidad == "AÑO":
+            df_filtrado["FECHA"] = pd.to_datetime(df_filtrado["AÑO"].astype(str), format="%Y")
+        
+        elif granularidad == "SEMESTRE":
+            # Convertir "I" -> 1 y "II" -> 2
+            df_filtrado["SEMESTRE_NUM"] = df_filtrado["SEMESTRE"].map({"I": 1, "II": 2})
+            df_filtrado["FECHA"] = pd.to_datetime(df_filtrado["AÑO"].astype(str) + "-" + 
+                                                  (df_filtrado["SEMESTRE_NUM"] * 6 - 5).astype(str), format="%Y-%m")
+        
+        elif granularidad == "TRIMESTRE":
+            # Convertir "I", "II", "III", "IV" a 1, 2, 3, 4
+            df_filtrado["TRIMESTRE_NUM"] = df_filtrado["TRIMESTRE"].map({"I": 1, "II": 2, "III": 3, "IV": 4})
+            df_filtrado["FECHA"] = pd.to_datetime(df_filtrado["AÑO"].astype(str) + "-" + 
+                                                  (df_filtrado["TRIMESTRE_NUM"] * 3 - 2).astype(str), format="%Y-%m")
         # Agrupar por año y calcular el volumen total
-        evolucion = df_filtrado.groupby('AÑO')['VOLUMEN M3'].sum()
+        evolucion = df_filtrado.groupby('FECHA')['VOLUMEN M3'].sum()
         
         # Graficar
         fig, ax = plt.subplots()
