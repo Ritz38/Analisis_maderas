@@ -123,7 +123,7 @@ def evolucion_temporal_especie_producto(df):
 def detectar_outliers(df):
     """Identifica valores atípicos en el volumen de madera movilizada."""
     z_scores = stats.zscore(df['VOLUMEN M3'])
-    return df.loc[np.abs(z_scores) > 3]
+    return df.loc[np.abs(z_scores) > 3].loc[:,['MUNICIPIO', 'ESPECIE', 'VOLUMEN M3']]
 
 def volumen_por_municipio(df):
     """Calcula el volumen total de madera movilizada por municipio."""
