@@ -57,11 +57,6 @@ def agregar_nombre_municipio(row, ax):
 def municipios_mayor_movilidad(df):
     """Muestra los 10 municipios con mayor movilización de madera en un mapa."""
     
-    municipios = gpd.read_file('https://raw.githubusercontent.com/Ritz38/Analisis_maderas/refs/heads/main/puntos_municipios.csv')
-    
-    municipios['geometry'] = gpd.GeoSeries.from_wkt(municipios['Geo Municipio'])
-    municipios = municipios.set_geometry('geometry')
-    
     municipios_movidos = df.groupby('MUNICIPIO').size().sort_values(ascending=False).head(10)
 
     # Filtrar los municipios que están en los 10 más movidos
@@ -158,7 +153,8 @@ def especies_menor_volumen(df):
     
     fig, ax = plt.subplots()
     colombia.plot(ax=ax, color='white', edgecolor='black')
-    #df_menor_volumen.plot(ax=ax, color='red', marker='o', markersize=5)
+    df_menor_volumen = municipios[municipios['NOM_MPIO'].isin(df_menor_volumen['ESPECIE'].unique())]
+    df_menor_volumen.plot(ax=ax, color='red', marker='o', markersize=5)
     ax.set_title("Distribución geográfica de especies con menor volumen movilizado")
     st.pyplot(fig)
 
@@ -190,8 +186,11 @@ def main():
     if df is not None:
         st.write("Vista previa de los datos:")
         st.write(df.head())
-        global colombia
+        global colombia, municipios
         colombia = gpd.read_file('https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/Colombia.geo.json')
+        municipios = gpd.read_file('https://raw.githubusercontent.com/Ritz38/Analisis_maderas/refs/heads/main/puntos_municipios.csv')
+        municipios['geometry'] = gpd.GeoSeries.from_wkt(municipios['Geo Municipio'])
+        municipios = municipios.set_geometry('geometry')
         
         maderas_comunes(df)
         
