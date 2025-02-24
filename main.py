@@ -158,7 +158,7 @@ def especies_menor_volumen(df):
     
     fig, ax = plt.subplots()
     colombia.plot(ax=ax, color='white', edgecolor='black')
-    df_menor_volumen.plot(ax=ax, color='red', marker='o', markersize=5)
+    #df_menor_volumen.plot(ax=ax, color='red', marker='o', markersize=5)
     ax.set_title("Distribución geográfica de especies con menor volumen movilizado")
     st.pyplot(fig)
 
