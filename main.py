@@ -54,7 +54,7 @@ def agregar_nombre_municipio(row, ax):
     """Agrega el nombre del municipio en el gráfico en las coordenadas del punto."""
     ax.text(row.geometry.x, row.geometry.y, row['NOM_MPIO'], fontsize=8, ha='right', color='black')
 
-def municipios_mayor_movilidad(df):
+def municipios_mayor_movilidad(df, municipios):
     """Muestra los 10 municipios con mayor movilización de madera en un mapa."""
     
     municipios_movidos = df.groupby('MUNICIPIO').size().sort_values(ascending=False).head(10)
@@ -146,7 +146,7 @@ def clustering_departamentos(df):
     ax.set_title("Clustering de departamentos por volumen de madera movilizada")
     st.pyplot(fig)
 
-def especies_menor_volumen(df):
+def especies_menor_volumen(df, municipios):
     """Identifica las especies con menor volumen movilizado y su distribución geográfica."""
     especies_menor_volumen = df.groupby('ESPECIE')['VOLUMEN M3'].sum().nsmallest(10)
     df_menor_volumen = df[df['ESPECIE'].isin(especies_menor_volumen.index)]
@@ -201,7 +201,7 @@ def main():
         mapa_calor(df)
         
         st.subheader("Municipios con mayor movilización")
-        municipios_mayor_movilidad(df)
+        municipios_mayor_movilidad(df, municipios)
         
         st.subheader("Evolución temporal por especie y tipo de producto")
         evolucion_temporal_especie_producto(df)
@@ -219,7 +219,7 @@ def main():
         st.write(volumen_por_municipio(df))
         
         st.subheader("Especies con menor volumen movilizado")
-        especies_menor_volumen(df)
+        especies_menor_volumen(df, municipios)
         
         st.subheader("Distribución de especies entre departamentos")
         distribucion_especies_entre_departamentos(df)
